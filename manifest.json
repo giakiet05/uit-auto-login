@@ -1,0 +1,25 @@
+{
+	"manifest_version": 3,
+	"name": "UIT Auto Login",
+	"version": "1.0.0",
+	"description": "Giúp bạn mở các trang web của UIT một cách nhanh chóng và tự động đăng nhập",
+	"action": {
+		"default_popup": "index.html"
+	},
+	"icons": {
+		"16": "src/assets/images/icon-16.png",
+		"48": "src/assets/images/icon-48.png",
+		"128": "src/assets/images/icon-128.png"
+	},
+	"content_scripts": [
+		{
+			"matches": ["https://*.uit.edu.vn/*"],
+			"js": ["src/content.ts"]
+		}
+	],
+	"background": {
+		"service_worker": "src/service-worker.ts"
+	},
+	"permissions": ["tabs", "storage"],
+	"host_permissions": ["https://*.uit.edu.vn/*"]
+}
