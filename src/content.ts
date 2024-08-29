@@ -30,15 +30,17 @@ async function handleAutoLogin() {
 	console.log(encryptedUserInfo);
 	const userInfo: UserInfo = await decryptUserInfo(key, encryptedUserInfo);
 
-	const usernameInputIds = [
-		'edit-name',
-		'username',
-		'formiz-\\:r3\\:-field-username__\\:r4\\:'
+	const usernameInputSelectors = [
+		'#edit-name',
+		'#username',
+		'#formiz-\\:r3\\:-field-username__\\:r4\\:',
+		'.js-login-username'
 	];
-	const passwordInputIds = [
+	const passwordInputSelectors = [
 		'edit-pass',
 		'password',
-		'formiz-\\:r3\\:-field-password__\\:r6\\:'
+		'formiz-\\:r3\\:-field-password__\\:r6\\:',
+		'.js-login-password'
 	];
 	const btnSelectors = [
 		'input[name=op]',
@@ -52,14 +54,14 @@ async function handleAutoLogin() {
 	let btn: HTMLButtonElement | null = null;
 
 	// Find username input
-	for (let id of usernameInputIds) {
-		usernameInput = document.querySelector<HTMLInputElement>(`#${id}`);
+	for (let selector of usernameInputSelectors) {
+		usernameInput = document.querySelector<HTMLInputElement>(`${selector}`);
 		if (usernameInput) break;
 	}
 
 	// Find password input
-	for (let id of passwordInputIds) {
-		passwordInput = document.querySelector<HTMLInputElement>(`#${id}`);
+	for (let selector of passwordInputSelectors) {
+		passwordInput = document.querySelector<HTMLInputElement>(`${selector}`);
 		if (passwordInput) break;
 	}
 
