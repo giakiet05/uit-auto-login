@@ -53,6 +53,7 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 			<Form className="ms-2">
 				{webs.map((web) => (
 					<Form.Check
+						className="my-2"
 						key={web.id}
 						type="switch"
 						checked={web.checked}
@@ -89,8 +90,8 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 				</Button>
 			</Form>
 			<p style={{ fontSize: 10 }}>
-				*Thông tin của bạn sẽ được mã hóa và lưu trữ trong máy của bạn nên hãy
-				yên tâm về vấn đề bảo mật
+				*Thông tin của bạn sẽ được mã hóa và chỉ được sử dụng để tự động đăng
+				nhập
 			</p>
 			<Link to="/">
 				<Button variant="secondary" className="float-end my-2">

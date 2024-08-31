@@ -1,7 +1,6 @@
 import { EncryptedUserInfo, UserInfo, Web } from './interfaces';
 import { getData } from './utils';
 import { decryptUserInfo, importKey } from './crypto';
-
 async function getAutoLoginWebUrls(): Promise<string[]> {
 	const webs: Web[] = (await getData('WEBS')) || [];
 	const autoLoginWebsUrls = webs
@@ -37,9 +36,9 @@ async function handleAutoLogin() {
 		'.js-login-username'
 	];
 	const passwordInputSelectors = [
-		'edit-pass',
-		'password',
-		'formiz-\\:r3\\:-field-password__\\:r6\\:',
+		'#edit-pass',
+		'#password',
+		'#formiz-\\:r3\\:-field-password__\\:r6\\:',
 		'.js-login-password'
 	];
 	const btnSelectors = [
@@ -52,16 +51,17 @@ async function handleAutoLogin() {
 	let usernameInput: HTMLInputElement | null = null;
 	let passwordInput: HTMLInputElement | null = null;
 	let btn: HTMLButtonElement | null = null;
-
+	const solverBtn: HTMLButtonElement | null =
+		document.querySelector('#solver-button');
 	// Find username input
 	for (let selector of usernameInputSelectors) {
-		usernameInput = document.querySelector<HTMLInputElement>(`${selector}`);
+		usernameInput = document.querySelector<HTMLInputElement>(selector);
 		if (usernameInput) break;
 	}
 
 	// Find password input
 	for (let selector of passwordInputSelectors) {
-		passwordInput = document.querySelector<HTMLInputElement>(`${selector}`);
+		passwordInput = document.querySelector<HTMLInputElement>(selector);
 		if (passwordInput) break;
 	}
 
@@ -76,17 +76,28 @@ async function handleAutoLogin() {
 
 	usernameInput!.dispatchEvent(new Event('input', { bubbles: true }));
 	passwordInput!.dispatchEvent(new Event('input', { bubbles: true }));
-
+	solverBtn?.click();
 	setTimeout(() => {
 		btn?.click();
 	}, 1000);
 }
 
-chrome.runtime.onMessage.addListener(async (message) => {
-	if (message.type === 'URL_UPDATE') {
-		const autoLoginWebsUrls = await getAutoLoginWebUrls();
-		if (autoLoginWebsUrls.includes(message.url)) {
-			handleAutoLogin();
+function addMessageListener() {
+	chrome.runtime.onMessage.addListener(async (message) => {
+		if (message.type === 'URL_UPDATE') {
+			const autoLoginWebsUrls = await getAutoLoginWebUrls();
+			if (autoLoginWebsUrls.includes(message.url)) {
+				handleAutoLogin();
+			}
 		}
-	}
-});
+	});
+}
+
+// Check if the DOM is already loaded
+if (document.readyState === 'loading') {
+	// If the DOM is still loading, wait for it to be ready
+	document.addEventListener('DOMContentLoaded', addMessageListener);
+} else {
+	// If the DOM is already fully loaded, immediately add the listener
+	addMessageListener();
+}
