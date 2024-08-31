@@ -1,23 +1,20 @@
 import { EncryptedUserInfo, UserInfo, Web } from './interfaces';
 import { getData } from './utils';
 import { decryptUserInfo, importKey } from './crypto';
-async function getAutoLoginWebUrls(): Promise<string[]> {
+async function getAutoLoginWebNames(): Promise<string[]> {
 	const webs: Web[] = (await getData('WEBS')) || [];
 	const autoLoginWebsUrls = webs
 		.filter((web) => web.checked) // Step 1: Filter the objects where `checked` is true
-		.map((web) => web.url); // Step 2: Extract the `url` property
+		.map((web) => web.name.toLowerCase()); // Step 2: Extract the `url` property
 
 	return autoLoginWebsUrls;
 }
 
-// Example usage:
-getAutoLoginWebUrls().then((urls) => {
-	console.log(urls); // You can use `urls` here
-});
-
 async function handleAutoLogin() {
 	const jwk: JsonWebKey | undefined = await getData('KEY');
-	if (!jwk) return;
+
+	if (!jwk) return; //This function only works if the userInfo is set
+
 	const key = await importKey(jwk);
 
 	const encryptedUserInfo: EncryptedUserInfo = (await getData('USER_INFO')) || {
@@ -26,7 +23,8 @@ async function handleAutoLogin() {
 		ivPassword: '',
 		ivUsername: ''
 	};
-	console.log(encryptedUserInfo);
+	//*console.log(encryptedUserInfo);
+
 	const userInfo: UserInfo = await decryptUserInfo(key, encryptedUserInfo);
 
 	const usernameInputSelectors = [
@@ -51,8 +49,7 @@ async function handleAutoLogin() {
 	let usernameInput: HTMLInputElement | null = null;
 	let passwordInput: HTMLInputElement | null = null;
 	let btn: HTMLButtonElement | null = null;
-	const solverBtn: HTMLButtonElement | null =
-		document.querySelector('#solver-button');
+
 	// Find username input
 	for (let selector of usernameInputSelectors) {
 		usernameInput = document.querySelector<HTMLInputElement>(selector);
@@ -76,19 +73,22 @@ async function handleAutoLogin() {
 
 	usernameInput!.dispatchEvent(new Event('input', { bubbles: true }));
 	passwordInput!.dispatchEvent(new Event('input', { bubbles: true }));
-	solverBtn?.click();
-	setTimeout(() => {
-		btn?.click();
-	}, 1000);
+	// setTimeout(() => {
+	// 	btn?.click();
+	// }, 1000);
+}
+
+interface Message {
+	type: string;
+	url: string;
 }
 
 function addMessageListener() {
-	chrome.runtime.onMessage.addListener(async (message) => {
+	chrome.runtime.onMessage.addListener(async (message: Message) => {
 		if (message.type === 'URL_UPDATE') {
-			const autoLoginWebsUrls = await getAutoLoginWebUrls();
-			if (autoLoginWebsUrls.includes(message.url)) {
-				handleAutoLogin();
-			}
+			const autoLoginWebsNames = await getAutoLoginWebNames();
+			const regex = new RegExp(autoLoginWebsNames.join('|'), 'i');
+			if (regex.test(message.url)) handleAutoLogin();
 		}
 	});
 }

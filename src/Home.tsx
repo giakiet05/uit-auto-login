@@ -30,7 +30,7 @@ export default function Home({ webs }: HomeProps) {
 				))}
 			</ListGroup>
 			<Link to="/setting">
-				<Button variant="primary" className="float-end my-2">
+				<Button variant="primary" className="my-3 w-100">
 					Cài đặt
 				</Button>
 			</Link>

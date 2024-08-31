@@ -9,7 +9,7 @@ chrome.tabs.onCreated.addListener((tab) => {
 				}
 			});
 		}
-	}, 3000); // Adjust delay if necessary
+	}, 1000); // Adjust delay if necessary
 });
 
 // Listen for when the active tab changes (switch to a tab which has already been opened)

@@ -39,7 +39,9 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 			key,
 			newInfo
 		);
-		console.log(encryptedUserInfo);
+
+		//* console.log(encryptedUserInfo);
+
 		saveData('KEY', jwkKey);
 		saveData('USER_INFO', encryptedUserInfo);
 		usernameRef.current.value = '';
@@ -48,8 +50,11 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 
 	return (
 		<Container>
-			<h6 className=" mt-2">Chọn trang web tự đăng nhập</h6>
-
+			<h6 className=" mt-2 mb-1">Chọn trang web tự đăng nhập</h6>
+			<p style={{ fontSize: 10, margin: 0 }}>
+				*Những trang web bạn chọn sẽ tự đăng nhập ngay cả khi bạn không dùng
+				extension để mở
+			</p>
 			<Form className="ms-2">
 				{webs.map((web) => (
 					<Form.Check
@@ -94,7 +99,7 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 				nhập
 			</p>
 			<Link to="/">
-				<Button variant="secondary" className="float-end my-2">
+				<Button variant="secondary" className="float-end my-3">
 					Quay lại
 				</Button>
 			</Link>
