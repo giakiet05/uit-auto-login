@@ -19,7 +19,7 @@ Hai tính năng này có thể được dùng chung hoặc riêng tùy vào các
 3. Chọn Load Unpacked => Chọn thư mục vừa giải nén => **Xong**
 
 > [!IMPORTANT]
-> - Hiện tại, extension chưa thể tự đăng nhập vào Student và Daa do 2 trang này có chứa Captcha (rất khó phá và MÌNH KHÔNG BIẾT CÁCH PHÁ)
+> - Hiện tại, extension chưa thể tự đăng nhập vào Student và Daa do 2 trang này có chứa Captcha (rất khó phá và mình không biết cách phá)
 > - Để tạm thời giải quyết ván đề này, các bạn vui lòng làm thêm một số bước sau đây.
 
 **Bước 3: Cài user script tự động check Captcha**
