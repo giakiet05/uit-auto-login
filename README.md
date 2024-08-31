@@ -40,3 +40,6 @@ Trong một vài trường hợp, Captcha có thể yêu cầu bạn giải câu
 > [Buster](https://chromewebstore.google.com/detail/buster-captcha-solver-for/mpbjkejclgfgadiemmefgebjfooflfhl)
 
 Bạn chỉ cần cài và đảm bảo extension này được bật.
+
+## 3. Hướng dẫn sử dụng
+Sẽ viết sau
