@@ -75,7 +75,7 @@ async function handleAutoLogin() {
 	passwordInput!.dispatchEvent(new Event('input', { bubbles: true }));
 	setTimeout(() => {
 		btn?.click();
-	}, 1000);
+	}, 2000);
 }
 
 interface Message {
