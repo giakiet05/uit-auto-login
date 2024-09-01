@@ -6,16 +6,15 @@
 
 - Mở các trang web của UIT một cách nhanh chóng.
 - Tự động đăng nhập các trang web đó.
-  
-Hai tính năng này có thể được dùng chung hoặc riêng tùy vào cách bạn cài đặt.
+
 ## 2. Cài đặt 
 > [!NOTE]
 > Đây là hướng dẫn cho Google Chrome, các trình duyệt khác các bạn cũng có thể cài theo tương tự!
 
-**Bước 1: Tải file sau về và giải nén**
+- **Bước 1: Tải file sau về và giải nén**
 > [uit-auto-login](https://github.com/giakiet05/uit-auto-login/releases/download/untagged-e9a6311c5a9a8d53494a/uit-auto-login.zip)
 
-**Bước 2: Load extension lên Chrome**
+- **Bước 2: Load extension lên Chrome**
 1. Vào Chrome => chọn **⋮** => Extension => Manage Extension
 2. Bật Developer Mode (góc trên bên phải)
 3. Chọn Load Unpacked => Chọn thư mục vừa giải nén => **Xong**
@@ -42,4 +41,15 @@ Trong một vài trường hợp, Captcha có thể yêu cầu bạn giải câu
 Bạn chỉ cần cài và đảm bảo extension này được bật.
 
 ## 3. Hướng dẫn sử dụng
-Sẽ viết sau
+Sau khi hoàn thành các bước cài đặt thì bạn có thể sử dụng ngay tính năng mở trang web.
+
+Để tự động đăng nhập, bạn cần phải cài đặt một xíu.
+
+- **Bước 1:** Chuyển sang tab cài đặt
+
+- **Bước 2** Chọn các trang web bạn muốn tự đăng nhập
+
+>**Lưu ý**: Các trang web được chọn sẽ tự đăng nhập kể cả khi bạn không dùng extension để mở
+
+- **Bước 3:** Nhập MSSV và mật khẩu bạn dùng để đăng nhập => Lưu
+  
