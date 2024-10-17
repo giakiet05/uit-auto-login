@@ -49,7 +49,5 @@ Sau khi hoàn thành các bước cài đặt thì bạn có thể sử dụng n
 
 - **Bước 2:** Chọn các trang web bạn muốn tự đăng nhập
 
-  **Lưu ý**: Các trang web được chọn sẽ tự đăng nhập kể cả khi bạn không dùng extension để mở
-
 - **Bước 3:** Nhập MSSV và mật khẩu bạn dùng để đăng nhập => Lưu
   
