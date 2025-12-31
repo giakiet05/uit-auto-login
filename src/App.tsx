@@ -44,6 +44,12 @@ export const initWebs: Web[] = [
 		name: 'Forum',
 		url: 'https://forum.uit.edu.vn',
 		checked: false
+	},
+	{
+		id: uuidV4(),
+		name: 'CTSV',
+		url: 'https://ctsv.uit.edu.vn/user/',
+		checked: false
 	}
 ];
 
