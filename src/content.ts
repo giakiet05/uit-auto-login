@@ -73,6 +73,26 @@ async function handleAutoLogin() {
 
 	usernameInput!.dispatchEvent(new Event('input', { bubbles: true }));
 	passwordInput!.dispatchEvent(new Event('input', { bubbles: true }));
+
+	// Handle captcha if exists
+	const captchaInput = document.querySelector<HTMLInputElement>(
+		'#edit-english-captcha-answer'
+	);
+	if (captchaInput) {
+		const captchaLabel = document.querySelector<HTMLLabelElement>(
+			'label[for="edit-english-captcha-answer"]'
+		);
+		if (captchaLabel) {
+			const labelText = captchaLabel.textContent || '';
+			const match = labelText.match(/\(([^)]+)\)/);
+			if (match && match[1]) {
+				const answer = match[1];
+				captchaInput.value = answer;
+				captchaInput.dispatchEvent(new Event('input', { bubbles: true }));
+			}
+		}
+	}
+
 	setTimeout(() => {
 		btn?.click();
 	}, 1500);
