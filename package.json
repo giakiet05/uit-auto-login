@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && vite build --config vite.config.scripts.ts && vite build --config vite.config.sw.ts && pnpm run copy-files",
+    "copy-files": "cp manifest.json dist/ && mkdir -p dist/assets && cp src/assets/images/icon-*.png dist/assets/",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -20,7 +21,6 @@
     "uuid": "^10.0.0"
   },
   "devDependencies": {
-    "@crxjs/vite-plugin": "^1.0.14",
     "@eslint/js": "^9.9.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
