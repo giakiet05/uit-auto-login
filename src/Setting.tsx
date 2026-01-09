@@ -102,23 +102,27 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 		}
 	}
 
-	const autoLoginTooltip = (
+		const autoLoginTooltip = (
 		<Tooltip id="auto-login-tooltip">
-			<strong>HDSD và lưu ý:</strong><br/>
-			1. Nhập MSSV + mật khẩu rồi lưu lại.<br/>
-			2. Chọn trang bạn muốn tự động đăng nhập.<br/>
-			<em>*Thông tin đăng nhập của bạn sẽ được mã hóa và lưu vào storage của extension, và chỉ được dùng cho mục đích tự đăng nhập, không dùng cho mục đích khác và không chia sẻ ra bên ngoài.</em><br/>
-			<em>**Dù thông tin đã được mã hóa, vẫn tiềm ẩn một số rủi ro bảo mật. Cân nhắc trước khi sử dụng.</em>
+			<div className="text-start">
+				<strong>HDSD và lưu ý:</strong><br/>
+				1. Nhập MSSV + mật khẩu rồi lưu lại.<br/>
+				2. Chọn trang bạn muốn tự động đăng nhập.<br/>
+				<em>*Thông tin đăng nhập của bạn sẽ được mã hóa và lưu vào storage của extension, chỉ được dùng cho mục đích tự đăng nhập, không dùng cho mục đích khác và không chia sẻ ra bên ngoài.</em><br/>
+				<strong className="text-warning"><em>*Lưu ý: Dù thông tin đã được mã hóa, vẫn tiềm ẩn một số rủi ro bảo mật. Chỉ nên sử dụng trên máy tính cá nhân.</em></strong>
+			</div>
 		</Tooltip>
 	);
 
 	const keepAliveTooltip = (
 		<Tooltip id="keep-alive-tooltip">
-			<strong>HDSD và lưu ý:</strong><br/>
-			1. Bật 'Duy trì kết nối'.<br/>
-			2. Đăng nhập vào web trường.<br/>
-			3. Chọn trang bạn muốn giữ đăng nhập.<br/>
-			<em>*Extension sẽ gửi request ngầm định kỳ đến các trang web để giúp bạn không bị logout do không hoạt động trong thời gian dài.</em>
+			<div className="text-start">
+				<strong>HDSD và lưu ý:</strong><br/>
+				1. Bật 'Duy trì kết nối'.<br/>
+				2. Đăng nhập vào web trường.<br/>
+				3. Chọn trang bạn muốn giữ đăng nhập.<br/>
+				<em>*Extension sẽ gửi request ngầm định kỳ đến các trang web để giúp bạn không bị logout do không hoạt động trong thời gian dài.</em>
+			</div>
 		</Tooltip>
 	);
 
@@ -132,7 +136,7 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 						<p className="mb-2 fw-bold small text-secondary d-flex align-items-center">
 							Chọn trang để tự đăng nhập:
 							<OverlayTrigger placement="bottom" overlay={autoLoginTooltip}>
-								<span className="ms-1 border rounded-circle d-inline-flex align-items-center justify-content-center text-muted" style={{ width: '14px', height: '14px', fontSize: '10px', cursor: 'help' }}>?</span>
+								<span className="ms-2 border border-black border-2 rounded-circle d-inline-flex align-items-center justify-content-center text-muted" style={{ width: '20px', height: '20px', fontSize: '14px', cursor: 'help' }}>?</span>
 							</OverlayTrigger>
 						</p>
 						<div style={{ maxHeight: '150px', overflowY: 'auto' }}>
@@ -184,7 +188,7 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 								onChange={(e) => handleToggleKeepAlive(e.target.checked)}
 							/>
 							<OverlayTrigger placement="bottom" overlay={keepAliveTooltip}>
-								<span className="ms-1 border rounded-circle d-inline-flex align-items-center justify-content-center text-muted" style={{ width: '14px', height: '14px', fontSize: '10px', cursor: 'help' }}>?</span>
+								<span className="ms-2 border border-black border-2 rounded-circle d-inline-flex align-items-center justify-content-center text-muted" style={{ width: '20px', height: '20px', fontSize: '14px', cursor: 'help' }}>?</span>
 							</OverlayTrigger>
 						</div>
 						<p className="mb-0 text-muted" style={{ fontSize: '0.75rem' }}>
