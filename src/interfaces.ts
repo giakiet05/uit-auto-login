@@ -2,7 +2,8 @@ export interface Web {
 	id: string;
 	name: string;
 	url: string;
-	checked: boolean;
+	isAutoLogin: boolean;
+	isKeepAlive: boolean;
 }
 
 export interface UserInfo {

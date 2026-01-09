@@ -1,10 +1,10 @@
-import { EncryptedUserInfo, UserInfo, Web } from './interfaces';
+import { Web, EncryptedUserInfo, UserInfo } from './interfaces';
 import { getData } from './utils';
 import { decryptUserInfo, importKey } from './crypto';
 async function getAutoLoginWebNames(): Promise<string[]> {
 	const webs: Web[] = (await getData('WEBS')) || [];
 	const autoLoginWebsUrls = webs
-		.filter((web) => web.checked) // Step 1: Filter the objects where `checked` is true
+		.filter((web) => web.isAutoLogin) // Step 1: Filter the objects where `isAutoLogin` is true
 		.map((web) => web.name.toLowerCase()); // Step 2: Extract the `url` property
 
 	return autoLoginWebsUrls;
@@ -30,72 +30,103 @@ async function handleAutoLogin() {
 	const usernameInputSelectors = [
 		'#edit-name',
 		'#username',
-		'#formiz-\\:r3\\:-field-username__\\:r4\\:',
+		'input[id*="field-username"]', // Cho DKHP Modal
+		'#login-account-name', // Cho Forum mới
 		'.js-login-username'
 	];
 	const passwordInputSelectors = [
 		'#edit-pass',
 		'#password',
-		'#formiz-\\:r3\\:-field-password__\\:r6\\:',
+		'input[id*="field-password"]', // Cho DKHP Modal
+		'#login-account-password', // Cho Forum mới
 		'.js-login-password'
 	];
 	const btnSelectors = [
 		'input[name=op]',
 		'#loginbtn',
+		'button[type="submit"].chakra-button', // Cho DKHP Modal
+		'#login-button', // Cho Forum mới
 		'.js-login-button',
 		'.css-1ou1lp0'
 	];
 
-	let usernameInput: HTMLInputElement | null = null;
-	let passwordInput: HTMLInputElement | null = null;
-	let btn: HTMLButtonElement | null = null;
+	// Hàm thực hiện điền và submit, có hỗ trợ retry
+	function attemptFillAndSubmit(retryCount = 0) {
+		const MAX_RETRIES = 3; // Thử tối đa 3 lần
 
-	// Find username input
-	for (let selector of usernameInputSelectors) {
-		usernameInput = document.querySelector<HTMLInputElement>(selector);
-		if (usernameInput) break;
-	}
+		let usernameInput: HTMLInputElement | null = null;
+		let passwordInput: HTMLInputElement | null = null;
+		let btn: HTMLButtonElement | null = null;
 
-	// Find password input
-	for (let selector of passwordInputSelectors) {
-		passwordInput = document.querySelector<HTMLInputElement>(selector);
-		if (passwordInput) break;
-	}
+		// Find username input
+		for (let selector of usernameInputSelectors) {
+			usernameInput = document.querySelector<HTMLInputElement>(selector);
+			if (usernameInput) break;
+		}
 
-	// Find login button
-	for (let selector of btnSelectors) {
-		btn = document.querySelector<HTMLButtonElement>(selector);
-		if (btn) break;
-	}
+		// Find password input
+		for (let selector of passwordInputSelectors) {
+			passwordInput = document.querySelector<HTMLInputElement>(selector);
+			if (passwordInput) break;
+		}
 
-	usernameInput!.value = userInfo.username;
-	passwordInput!.value = userInfo.password;
+		// Find login button
+		for (let selector of btnSelectors) {
+			btn = document.querySelector<HTMLButtonElement>(selector);
+			if (btn) break;
+		}
 
-	usernameInput!.dispatchEvent(new Event('input', { bubbles: true }));
-	passwordInput!.dispatchEvent(new Event('input', { bubbles: true }));
+		// Safety check: Only proceed if inputs are found
+		// Nếu không tìm thấy input, có thể đã login thành công hoặc đang ở trang khác -> Stop
+		if (!usernameInput || !passwordInput) return;
 
-	// Handle captcha if exists
-	const captchaInput = document.querySelector<HTMLInputElement>(
-		'#edit-english-captcha-answer'
-	);
-	if (captchaInput) {
-		const captchaLabel = document.querySelector<HTMLLabelElement>(
-			'label[for="edit-english-captcha-answer"]'
+		console.log(`Auto Login attempt ${retryCount + 1}/${MAX_RETRIES + 1}`);
+
+		usernameInput.value = userInfo.username;
+		passwordInput.value = userInfo.password;
+
+		usernameInput.dispatchEvent(new Event('input', { bubbles: true }));
+		passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+		// Handle captcha if exists
+		const captchaInput = document.querySelector<HTMLInputElement>(
+			'#edit-english-captcha-answer'
 		);
-		if (captchaLabel) {
-			const labelText = captchaLabel.textContent || '';
-			const match = labelText.match(/\(([^)]+)\)/);
-			if (match && match[1]) {
-				const answer = match[1];
-				captchaInput.value = answer;
-				captchaInput.dispatchEvent(new Event('input', { bubbles: true }));
+		if (captchaInput) {
+			const captchaLabel = document.querySelector<HTMLLabelElement>(
+				'label[for="edit-english-captcha-answer"]'
+			);
+			if (captchaLabel) {
+				const labelText = captchaLabel.textContent || '';
+				const match = labelText.match(/\(([^)]+)\)/);
+				if (match && match[1]) {
+					const answer = match[1];
+					captchaInput.value = answer;
+					captchaInput.dispatchEvent(new Event('input', { bubbles: true }));
+				}
 			}
 		}
+
+		setTimeout(() => {
+			btn?.click();
+
+			// Nếu vẫn còn lượt retry, đợi 2s rồi check xem còn ở trang login không
+			if (retryCount < MAX_RETRIES) {
+				setTimeout(() => {
+					// Check lại xem input user còn tồn tại không
+					// Nếu còn tồn tại => Vẫn chưa login xong hoặc thất bại => Thử lại
+					const stillOnPage = document.querySelector(usernameInputSelectors.join(','));
+					if (stillOnPage) {
+						console.log('Login failed or taking too long, retrying...');
+						attemptFillAndSubmit(retryCount + 1);
+					}
+				}, 2000);
+			}
+		}, 1000);
 	}
 
-	setTimeout(() => {
-		btn?.click();
-	}, 1500);
+	// Bắt đầu thử
+	attemptFillAndSubmit(0);
 }
 
 interface Message {
@@ -109,6 +140,16 @@ function addMessageListener() {
 			const autoLoginWebsNames = await getAutoLoginWebNames();
 			const regex = new RegExp(autoLoginWebsNames.join('|'), 'i');
 			if (regex.test(message.url)) handleAutoLogin();
+		} else if (message.type === 'PING_SERVER') {
+			// Ping server để refresh session
+			try {
+				await fetch(window.location.origin, {
+					credentials: 'include'
+				});
+				console.log('Keep-alive ping successful');
+			} catch (error) {
+				console.error('Keep-alive ping failed:', error);
+			}
 		}
 	});
 }

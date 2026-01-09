@@ -1,6 +1,6 @@
 {
 	"manifest_version": 3,
-	"name": "UIT Auto Login",
+	"name": "UIT Login Manager",
 	"version": "1.0.0",
 	"description": "Giúp bạn mở các trang web của UIT một cách nhanh chóng và tự động đăng nhập",
 	"action": {
@@ -20,6 +20,6 @@
 	"background": {
 		"service_worker": "service-worker.js"
 	},
-	"permissions": ["tabs", "storage"],
+	"permissions": ["tabs", "storage", "cookies", "alarms"],
 	"host_permissions": ["https://*.uit.edu.vn/*"]
 }

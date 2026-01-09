@@ -1,5 +1,5 @@
 
-# UIT AUTO LOGIN 
+# UIT LOGIN MANAGER 
 
 ## 1. Chức năng
 Đây là một Chrome Extension dùng để: 
