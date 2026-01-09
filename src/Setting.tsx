@@ -1,4 +1,4 @@
-import { Container, Button, Form, Alert, Tabs, Tab, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Container, Button, Form, Alert, Tabs, Tab, OverlayTrigger, Popover, Modal } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { EncryptedUserInfo, UserInfo, Web } from './interfaces';
 import { Dispatch, FormEvent, SetStateAction, useRef, useState, useEffect } from 'react';
@@ -23,6 +23,10 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 	});
 	const [syncMessage, setSyncMessage] = useState<string>('');
 	const [saveMessage, setSaveMessage] = useState<string>('');
+	
+	// State quản lý Modal và Popover
+	const [showSecurityModal, setShowSecurityModal] = useState(false);
+	const [showAutoLoginPopover, setShowAutoLoginPopover] = useState(false);
 
 	// Load cookie status khi component mount
 	useEffect(() => {
@@ -68,7 +72,7 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 		if (usernameRef.current) usernameRef.current.value = '';
 		if (passwordRef.current) passwordRef.current.value = '';
 		
-		setSaveMessage('Đã lưu thông tin đăng nhập thành công!');
+		setSaveMessage('Đã lưu thông đăng nhập thành công!');
 		setTimeout(() => setSaveMessage(''), 3000);
 	}
 
@@ -102,28 +106,48 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 		}
 	}
 
-		const autoLoginTooltip = (
-		<Tooltip id="auto-login-tooltip">
-			<div className="text-start">
-				<strong>HDSD và lưu ý:</strong><br/>
-				1. Nhập MSSV + mật khẩu rồi lưu lại.<br/>
-				2. Chọn trang bạn muốn tự động đăng nhập.<br/>
-				<em>*Thông tin đăng nhập của bạn sẽ được mã hóa và lưu vào storage của extension, chỉ được dùng cho mục đích tự đăng nhập, không dùng cho mục đích khác và không chia sẻ ra bên ngoài.</em><br/>
-				<strong className="text-warning"><em>*Lưu ý: Dù thông tin đã được mã hóa, vẫn tiềm ẩn một số rủi ro bảo mật. Chỉ nên sử dụng trên máy tính cá nhân.</em></strong>
-			</div>
-		</Tooltip>
+	const autoLoginPopover = (
+		<Popover id="auto-login-popover">
+			<Popover.Header as="h3" className="text-primary">Tự đăng nhập</Popover.Header>
+			<Popover.Body>
+				<div className="text-start">
+					<strong>HDSD và lưu ý:</strong><br/>
+					1. Nhập MSSV + mật khẩu rồi lưu lại.<br/>
+					2. Chọn trang bạn muốn tự động đăng nhập.<br/>
+					<hr className="my-2"/>
+					<em>*Thông tin đăng nhập của bạn sẽ được mã hóa và lưu vào storage của extension, chỉ được dùng cho mục đích tự đăng nhập, không dùng cho mục đích khác và không chia sẻ ra bên ngoài.</em><br/>
+					<strong className="text-danger">
+						<em>*Lưu ý: Dù thông tin đã được mã hóa, vẫn tiềm ẩn một số rủi ro bảo mật. Chỉ nên sử dụng trên máy tính cá nhân. </em>
+						<span 
+							className="text-primary text-decoration-underline" 
+							style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}
+							onClick={() => {
+								setShowSecurityModal(true);
+								setShowAutoLoginPopover(false);
+							}}
+						>
+							Xem thêm
+						</span>
+					</strong>
+				</div>
+			</Popover.Body>
+		</Popover>
 	);
 
-	const keepAliveTooltip = (
-		<Tooltip id="keep-alive-tooltip">
-			<div className="text-start">
-				<strong>HDSD và lưu ý:</strong><br/>
-				1. Bật 'Duy trì kết nối'.<br/>
-				2. Đăng nhập vào web trường.<br/>
-				3. Chọn trang bạn muốn giữ đăng nhập.<br/>
-				<em>*Extension sẽ gửi request ngầm định kỳ đến các trang web để giúp bạn không bị logout do không hoạt động trong thời gian dài.</em>
-			</div>
-		</Tooltip>
+	const keepAlivePopover = (
+		<Popover id="keep-alive-popover">
+			<Popover.Header as="h3" className="text-success">Giữ kết nối</Popover.Header>
+			<Popover.Body>
+				<div className="text-start">
+					<strong>HDSD và lưu ý:</strong><br/>
+					1. Bật 'Duy trì kết nối'.<br/>
+					2. Đăng nhập vào web trường.<br/>
+					3. Chọn trang bạn muốn giữ đăng nhập.<br/>
+					<hr className="my-2"/>
+					<em>*Extension sẽ gửi request ngầm định kỳ đến các trang web để giúp bạn không bị logout do không hoạt động trong thời gian dài.</em>
+				</div>
+			</Popover.Body>
+		</Popover>
 	);
 
 	return (
@@ -135,8 +159,15 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 					<div className="bg-light p-2 rounded mb-3 border">
 						<p className="mb-2 fw-bold small text-secondary d-flex align-items-center">
 							Chọn trang để tự đăng nhập:
-							<OverlayTrigger placement="bottom" overlay={autoLoginTooltip}>
-								<span className="ms-2 border border-black border-2 rounded-circle d-inline-flex align-items-center justify-content-center text-muted" style={{ width: '20px', height: '20px', fontSize: '14px', cursor: 'help' }}>?</span>
+							<OverlayTrigger 
+								trigger="click" 
+								rootClose 
+								placement="bottom" 
+								overlay={autoLoginPopover}
+								show={showAutoLoginPopover}
+								onToggle={(nextShow) => setShowAutoLoginPopover(nextShow)}
+							>
+								<span className="ms-2 border border-black border-2 rounded-circle d-inline-flex align-items-center justify-content-center text-muted" style={{ width: '20px', height: '20px', fontSize: '14px', cursor: 'pointer' }}>?</span>
 							</OverlayTrigger>
 						</p>
 						<div style={{ maxHeight: '150px', overflowY: 'auto' }}>
@@ -187,8 +218,8 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 								checked={cookieStatus.enabled}
 								onChange={(e) => handleToggleKeepAlive(e.target.checked)}
 							/>
-							<OverlayTrigger placement="bottom" overlay={keepAliveTooltip}>
-								<span className="ms-2 border border-black border-2 rounded-circle d-inline-flex align-items-center justify-content-center text-muted" style={{ width: '20px', height: '20px', fontSize: '14px', cursor: 'help' }}>?</span>
+							<OverlayTrigger trigger="click" rootClose placement="bottom" overlay={keepAlivePopover}>
+								<span className="ms-2 border border-black border-2 rounded-circle d-inline-flex align-items-center justify-content-center text-muted" style={{ width: '20px', height: '20px', fontSize: '14px', cursor: 'pointer' }}>?</span>
 							</OverlayTrigger>
 						</div>
 						<p className="mb-0 text-muted" style={{ fontSize: '0.75rem' }}>
@@ -241,6 +272,33 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 					Quay lại màn hình chính
 				</Button>
 			</Link>
+
+			{/* Security Risk Modal */}
+			<Modal show={showSecurityModal} onHide={() => setShowSecurityModal(false)} centered size="sm">
+				<Modal.Header closeButton className="py-2">
+					<Modal.Title as="h6" className="fw-bold text-danger">Rủi ro bảo mật</Modal.Title>
+				</Modal.Header>
+				<Modal.Body className="small">
+					<p>Do đặc thù tính năng <strong>Tự đăng nhập</strong>, extension buộc phải lưu trữ cả thông tin đăng nhập đã mã hóa và khóa giải mã ngay trên trình duyệt.</p>
+					
+					<h6 className="fw-bold text-dark mt-3" style={{ fontSize: '0.9rem' }}>1. Truy cập vật lý</h6>
+					<p className="text-muted mb-2">
+						Nếu ai đó sử dụng máy tính của bạn, họ có thể truy cập vào bộ nhớ của extension để lấy thông tin đăng nhập và khóa giải mã, sau đó giải mã chúng.
+					</p>
+
+					<h6 className="fw-bold text-dark mt-3" style={{ fontSize: '0.9rem' }}>2. Phần mềm độc hại (Malware)</h6>
+					<p className="text-muted mb-2">
+						Nếu máy tính bị nhiễm virus, hacker có thể đánh cắp dữ liệu trình duyệt (bao gồm cả dữ liệu của extension).
+					</p>
+
+	
+				</Modal.Body>
+				<Modal.Footer className="py-1">
+					<Button variant="secondary" size="sm" onClick={() => setShowSecurityModal(false)}>
+						Đã hiểu
+					</Button>
+				</Modal.Footer>
+			</Modal>
 		</Container>
 	);
 }
