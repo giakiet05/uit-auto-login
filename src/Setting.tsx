@@ -106,7 +106,7 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 		<Tooltip id="auto-login-tooltip">
 			<strong>HDSD và lưu ý:</strong><br/>
 			1. Nhập MSSV + mật khẩu rồi lưu lại.<br/>
-			2. Chọn trang bạn muốn tự động đăng nhập. Những trang bạn chọn sẽ được tự động điền thông tin đăng nhập.<br/>
+			2. Chọn trang bạn muốn tự động đăng nhập.<br/>
 			<em>*Thông tin đăng nhập của bạn sẽ được mã hóa và lưu vào storage của extension, và chỉ được dùng cho mục đích tự đăng nhập, không dùng cho mục đích khác và không chia sẻ ra bên ngoài.</em><br/>
 			<em>**Dù thông tin đã được mã hóa, vẫn tiềm ẩn một số rủi ro bảo mật. Cân nhắc trước khi sử dụng.</em>
 		</Tooltip>
