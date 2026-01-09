@@ -88,7 +88,7 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 
 				await saveData('COOKIE_STATUS', newStatus);
 				setCookieStatus(newStatus);
-				chrome.alarms.create('keepAlive', { periodInMinutes: 1 });
+				chrome.alarms.create('keepAlive', { periodInMinutes: 5 });
 				setSyncMessage('');
 			} catch (error) {
 				setSyncMessage('Lỗi khi bật: ' + error);
@@ -171,6 +171,9 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 				</Tab>
 
 				<Tab eventKey="keepalive" title="Giữ kết nối">
+					<Alert variant="warning" className="py-1 px-2 small mb-2 text-center" style={{ fontSize: '0.8rem' }}>
+						<strong>Lưu ý:</strong> Tính năng đang thử nghiệm, có thể hoạt động không ổn định.
+					</Alert>
 					<div className="bg-white p-2 rounded mb-2 border border-success">
 						<div className="d-flex align-items-center mb-1">
 							<Form.Check 
@@ -209,9 +212,8 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 								</div>
 							</div>
 
-							<div className="alert alert-info py-2 px-2 small mb-2">
-								<div><strong>Trạng thái:</strong> Đang chạy ngầm (1p/lần)</div>
-								<div><strong>Check lần cuối:</strong> {cookieStatus.lastSynced ? new Date(cookieStatus.lastSynced).toLocaleTimeString('vi-VN') : '-'}</div>
+							<div className="alert alert-info py-2 px-2 small mb-2 text-center">
+								<strong>Check lần cuối:</strong> {cookieStatus.lastSynced ? new Date(cookieStatus.lastSynced).toLocaleTimeString('vi-VN') : '-'}
 							</div>
 						</>
 					)}
