@@ -59,6 +59,20 @@ async function handleAutoLogin() {
 	function attemptFillAndSubmit(retryCount = 0) {
 		const MAX_RETRIES = 3; // Thử tối đa 3 lần
 
+		// --- XỬ LÝ LỖI COURSES (Đã đăng nhập) ---
+		// Nếu gặp thông báo "cần đăng xuất trước khi đăng nhập", bấm nút Huỷ bỏ để vào trang chủ
+		if (document.body.textContent?.includes('cần đăng xuất trước khi đăng nhập')) {
+			const cancelButton = Array.from(document.querySelectorAll('button.btn.btn-secondary'))
+				.find(b => b.textContent?.trim() === 'Huỷ bỏ');
+			
+			if (cancelButton) {
+				console.log('Detected Courses anomaly modal, clicking Cancel...');
+				(cancelButton as HTMLButtonElement).click();
+				return;
+			}
+		}
+		// ----------------------------------------
+
 		let usernameInput: HTMLInputElement | null = null;
 		let passwordInput: HTMLInputElement | null = null;
 		let btn: HTMLButtonElement | null = null;

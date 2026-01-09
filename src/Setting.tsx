@@ -72,7 +72,7 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 		if (usernameRef.current) usernameRef.current.value = '';
 		if (passwordRef.current) passwordRef.current.value = '';
 		
-		setSaveMessage('Đã lưu thông đăng nhập thành công!');
+		setSaveMessage('Đã lưu thông tin đăng nhập thành công!');
 		setTimeout(() => setSaveMessage(''), 3000);
 	}
 
@@ -222,9 +222,6 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 								<span className="ms-2 border border-black border-2 rounded-circle d-inline-flex align-items-center justify-content-center text-muted" style={{ width: '20px', height: '20px', fontSize: '14px', cursor: 'pointer' }}>?</span>
 							</OverlayTrigger>
 						</div>
-						<p className="mb-0 text-muted" style={{ fontSize: '0.75rem' }}>
-						*Extension sẽ gửi request ngầm định kỳ đến các trang web để giúp bạn không bị logout do không hoạt động trong thời gian dài.
-						</p>
 					</div>
 
 					{cookieStatus.enabled && (
@@ -291,7 +288,9 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 						Nếu máy tính bị nhiễm virus, hacker có thể đánh cắp dữ liệu trình duyệt (bao gồm cả dữ liệu của extension).
 					</p>
 
-	
+					<Alert variant="warning" className="mt-3 mb-0 p-2 text-start" style={{ fontSize: '0.85rem' }}>
+						Chỉ nên dùng extension này trên máy cá nhân, không dùng trên máy công cộng.
+					</Alert>
 				</Modal.Body>
 				<Modal.Footer className="py-1">
 					<Button variant="secondary" size="sm" onClick={() => setShowSecurityModal(false)}>
