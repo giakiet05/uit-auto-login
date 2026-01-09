@@ -12,44 +12,51 @@ export const initWebs: Web[] = [
 		id: uuidV4(),
 		name: 'Student',
 		url: 'https://student.uit.edu.vn',
-		checked: false
+		isAutoLogin: false,
+		isKeepAlive: false
 	},
 
 	{
 		id: uuidV4(),
 		name: 'Courses',
 		url: 'https://courses.uit.edu.vn',
-		checked: false
+		isAutoLogin: false,
+		isKeepAlive: false
 	},
 	{
 		id: uuidV4(),
 		name: 'DAA',
 		url: 'https://daa.uit.edu.vn',
-		checked: false
+		isAutoLogin: false,
+		isKeepAlive: false
 	},
 	{
 		id: uuidV4(),
 		name: 'DRL',
 		url: 'https://drl.uit.edu.vn',
-		checked: false
+		isAutoLogin: false,
+		isKeepAlive: false
 	},
 	{
 		id: uuidV4(),
 		name: 'DKHP',
 		url: 'https://dkhp.uit.edu.vn',
-		checked: false
+		isAutoLogin: false,
+		isKeepAlive: false
 	},
 	{
 		id: uuidV4(),
 		name: 'Forum',
-		url: 'https://forum.uit.edu.vn',
-		checked: false
+		url: 'https://forum.uit.edu.vn/login',
+		isAutoLogin: false,
+		isKeepAlive: false
 	},
 	{
 		id: uuidV4(),
 		name: 'CTSV',
-		url: 'https://ctsv.uit.edu.vn/user/',
-		checked: false
+		url: 'https://ctsv.uit.edu.vn/user',
+		isAutoLogin: false,
+		isKeepAlive: false
 	}
 ];
 
@@ -60,8 +67,29 @@ export default function App() {
 	useEffect(() => {
 		async function fetchData() {
 			try {
-				const storedWebs = await getData<Web[]>('WEBS');
-				if (storedWebs) setWebs(storedWebs);
+				const storedWebs = await getData<any[]>('WEBS');
+				if (storedWebs) {
+					// Migration logic: Map old 'checked' to new 'isAutoLogin' if needed
+					// and ensure new fields exist
+					const migratedWebs = storedWebs.map((w) => ({
+						...w,
+						isAutoLogin: w.isAutoLogin ?? w.checked ?? false,
+						isKeepAlive: w.isKeepAlive ?? false
+					}));
+					
+					// Remove the old 'checked' property if it exists to clean up
+					let cleanedWebs = migratedWebs.map(({ checked, ...rest }) => rest);
+
+					// Migration URL: Update Forum URL
+					cleanedWebs = cleanedWebs.map((w: Web) => {
+						if (w.name === 'Forum' && w.url === 'https://forum.uit.edu.vn') {
+							return { ...w, url: 'https://forum.uit.edu.vn/login' };
+						}
+						return w;
+					});
+					
+					setWebs(cleanedWebs);
+				}
 
 				//*console.log('Fetching data successfully', storedWebs);
 			} catch (error) {

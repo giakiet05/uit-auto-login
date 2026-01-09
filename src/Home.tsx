@@ -13,9 +13,9 @@ export default function Home({ webs }: HomeProps) {
 
 	return (
 		<Container>
-			<h1 className="my-3 text-center">
-				<Image src={logo} fluid style={{ width: 50 }} className="me-2" />
-				UIT AUTO LOGIN
+			<h1 className="my-3 text-center" style={{ fontSize: '20px', fontWeight: 'bold' }}>
+				<Image src={logo} fluid style={{ width: 40 }} className="me-2" />
+				UIT LOGIN MANAGER
 			</h1>
 			<ListGroup variant="flush">
 				{webs.map((web) => (

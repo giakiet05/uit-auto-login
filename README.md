@@ -1,53 +1,37 @@
+# UIT LOGIN MANAGER v2.0.0
 
-# UIT AUTO LOGIN 
+Extension giúp sinh viên UIT tự động đăng nhập và giữ kết nối trên các trang web của trường.
 
-## 1. Chức năng
-Đây là một Chrome Extension dùng để: 
+## Tính năng chính
 
-- Mở các trang web của UIT một cách nhanh chóng.
-- Tự động đăng nhập các trang web đó.
+- **Mở nhanh web:** Mở nhanh các trang web của UIT chỉ với 1 click ở bất kì đâu trên trình duyệt mà không cần phải search hay nhớ url.
+- **Tự động đăng nhập:** Tự điền MSSV và mật khẩu khi truy cập các trang web của UIT
+- **Duy trì kết nối:** Gửi request ngầm mỗi 5 phút giúp bạn không bị logout do không hoạt động.
 
-## 2. Cài đặt 
-> [!NOTE]
-> Đây là hướng dẫn cho Google Chrome, các trình duyệt khác các bạn cũng có thể cài theo tương tự!
+## Cài đặt
 
-- **Bước 1: Tải file sau về và giải nén**
-> [uit-auto-login](https://github.com/giakiet05/uit-auto-login/releases/download/v1.0.0/uit-auto-login.zip)
+1. Tải file zip tại [Releases](https://github.com/giakiet05/uit-auto-login/releases).
+2. Giải nén file vừa tải về một thư mục cố định.
+3. Truy cập `chrome://extensions/` trên trình duyệt (Extension Manager).
+4. Bật Developer Mode.
+5. Load Extension:
+   - Chọn **Load unpacked**.
+   - Chọn extension tại thư mục bạn vừa giải nén.
+   - **Xong!** Extension sẽ xuất hiện trên thanh công cụ.
 
-- **Bước 2: Load extension lên Chrome**
-1. Vào Chrome => chọn **⋮** => Extension => Manage Extension
-2. Bật Developer Mode (góc trên bên phải)
-3. Chọn Load Unpacked => Chọn thư mục vừa giải nén => **Xong**
+## Hướng dẫn sử dụng
 
-> [!IMPORTANT]
-> - Hiện tại, extension chưa thể tự đăng nhập vào Student và Daa do 2 trang này có chứa Captcha (rất khó phá và mình không biết cách phá).
-> - Để tạm thời giải quyết vấn đề này, các bạn vui lòng làm thêm một số bước sau đây.
+### 1. Thiết lập Tự đăng nhập
 
-**Bước 3: Cài user script tự động check Captcha**
+- Bấm vào icon Extension -> Chọn **Cài đặt**.
+- Tại tab **Tự đăng nhập**:
+  - Nhập **MSSV** và **mật khẩu**.
+  - Bấm **Lưu thông tin**.
+  - Chọn các trang web bạn muốn tự động điền form.
 
-1. Cài [Tampermonkey](https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) trên Chrome Web Store
-2. Copy script ở [đây](https://greasyfork.org/en/scripts/494965-auto-click-i-m-not-a-robot/code?fbclid=IwZXh0bgNhZW0CMTEAAR3zGL3Hs6jzN6XcI9l-JeW_-fnytghMQVRPxX0G4QAbCKYjDYS6oRqbw0k_aem_EzoheU6LQoTRWwWMRc3QwQ)
-3. Mở Tampermonkey => Create a new script
-4. Dán script vào => File => Save
-5. Enable script
-   
-_Tới đây bạn đã có thể tự đăng nhập được vào 2 trang web trên._
+### 2. Thiết lập Giữ kết nối (Thử nghiệm)
 
-**Bước 4 (Optional): Cài Buster**
-
-Trong một vài trường hợp, Captcha có thể yêu cầu bạn giải câu đố, để tiết kiệm thời gian giải, hãy cài thêm extension này:
-> [Buster](https://chromewebstore.google.com/detail/buster-captcha-solver-for/mpbjkejclgfgadiemmefgebjfooflfhl)
-
-Bạn chỉ cần cài và đảm bảo extension này được bật.
-
-## 3. Hướng dẫn sử dụng
-Sau khi hoàn thành các bước cài đặt thì bạn có thể sử dụng ngay tính năng mở trang web.
-
-Để tự động đăng nhập, bạn cần phải cài đặt một xíu.
-
-- **Bước 1:** Chuyển sang tab cài đặt
-
-- **Bước 2:** Chọn các trang web bạn muốn tự đăng nhập
-
-- **Bước 3:** Nhập MSSV và mật khẩu bạn dùng để đăng nhập => Lưu
-  
+- Tại tab **Giữ kết nối**:
+  - Đảm bảo bạn đã đăng nhập vào các trang web của UIT trước.
+  - Bật **Duy trì kết nối**.
+  - Chọn các trang web bạn muốn giữ đăng nhập.

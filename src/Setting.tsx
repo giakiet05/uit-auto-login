@@ -1,9 +1,15 @@
-import { Container, Button, Form } from 'react-bootstrap';
+import { Container, Button, Form, Alert, Tabs, Tab, OverlayTrigger, Popover, Modal } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { EncryptedUserInfo, UserInfo, Web } from './interfaces';
-import { Dispatch, FormEvent, SetStateAction, useRef } from 'react';
-import { saveData } from './utils';
+import { Dispatch, FormEvent, SetStateAction, useRef, useState, useEffect } from 'react';
+import { saveData, getData } from './utils';
 import { generateKey, encryptUserInfo, exportKey } from './crypto';
+
+interface CookieStatus {
+	enabled: boolean;
+	lastSynced?: number;
+}
+
 interface SettingProps {
 	webs: Web[];
 	setWebs: Dispatch<SetStateAction<Web[]>>;
@@ -12,10 +18,31 @@ interface SettingProps {
 export default function Setting({ webs, setWebs }: SettingProps) {
 	const usernameRef = useRef<HTMLInputElement>(null);
 	const passwordRef = useRef<HTMLInputElement>(null);
-	function handleToggleCheck(id: string) {
+	const [cookieStatus, setCookieStatus] = useState<CookieStatus>({
+		enabled: false
+	});
+	const [syncMessage, setSyncMessage] = useState<string>('');
+	const [saveMessage, setSaveMessage] = useState<string>('');
+	
+	// State quản lý Modal và Popover
+	const [showSecurityModal, setShowSecurityModal] = useState(false);
+	const [showAutoLoginPopover, setShowAutoLoginPopover] = useState(false);
+
+	// Load cookie status khi component mount
+	useEffect(() => {
+		async function loadCookieStatus() {
+			const status = await getData<CookieStatus>('COOKIE_STATUS');
+			if (status) {
+				setCookieStatus(status);
+			}
+		}
+		loadCookieStatus();
+	}, []);
+
+	function handleToggleCheck(id: string, field: 'isAutoLogin' | 'isKeepAlive') {
 		setWebs((prevWebs: Web[]) => {
 			const newWebs = prevWebs.map((web) => {
-				if (web.id === id) return { ...web, checked: !web.checked };
+				if (web.id === id) return { ...web, [field]: !web[field] };
 				else return web;
 			});
 			saveData('WEBS', newWebs);
@@ -40,69 +67,237 @@ export default function Setting({ webs, setWebs }: SettingProps) {
 			newInfo
 		);
 
-		//* console.log(encryptedUserInfo);
-
 		saveData('KEY', jwkKey);
 		saveData('USER_INFO', encryptedUserInfo);
-		usernameRef.current.value = '';
-		passwordRef.current.value = '';
+		if (usernameRef.current) usernameRef.current.value = '';
+		if (passwordRef.current) passwordRef.current.value = '';
+		
+		setSaveMessage('Đã lưu thông tin đăng nhập thành công!');
+		setTimeout(() => setSaveMessage(''), 3000);
 	}
 
-	return (
-		<Container>
-			<h6 className=" mt-2 mb-1">Chọn trang web tự đăng nhập</h6>
-			<p style={{ fontSize: 10, margin: 0 }}>
-				*Những trang web bạn chọn sẽ tự đăng nhập ngay cả khi bạn không dùng
-				extension để mở
-			</p>
-			<Form className="ms-2">
-				{webs.map((web) => (
-					<Form.Check
-						className="my-2"
-						key={web.id}
-						type="switch"
-						checked={web.checked}
-						id={web.id}
-						label={web.name}
-						onChange={() => handleToggleCheck(web.id)}
-					/>
-				))}
-			</Form>
+	async function handleToggleKeepAlive(enabled: boolean) {
+		if (enabled) {
+			try {
+				const cookies = await chrome.cookies.getAll({ domain: '.uit.edu.vn' });
+				if (cookies.length === 0) {
+					setSyncMessage('Cần đăng nhập UIT trước khi bật!');
+					return;
+				}
 
-			<Form className="my-3" onSubmit={handleSubmit}>
-				<h6>Thiết lập thông tin đăng nhập</h6>
-				<Form.Group controlId="username" className="mb-2">
-					<Form.Control
-						required
-						size="sm"
-						placeholder="MSSV"
-						className=" border-black"
-						ref={usernameRef}
-					/>
-				</Form.Group>
-				<Form.Group controlId="password">
-					<Form.Control
-						required
-						size="sm"
-						type="password"
-						placeholder="Mật khẩu"
-						className=" border-black"
-						ref={passwordRef}
-					/>
-				</Form.Group>
-				<Button variant="primary" type="submit" className="ms-3 float-end my-2">
-					Lưu
-				</Button>
-			</Form>
-			<p style={{ fontSize: 10 }}>
-				*Thông tin của bạn sẽ được mã hóa và chỉ được sử dụng để tự động đăng
-				nhập
-			</p>
-			<Link to="/">
-				<Button variant="secondary" className="float-end my-3">
-					Quay lại
+				const newStatus: CookieStatus = {
+					enabled: true,
+					lastSynced: Date.now()
+				};
+
+				await saveData('COOKIE_STATUS', newStatus);
+				setCookieStatus(newStatus);
+				chrome.alarms.create('keepAlive', { periodInMinutes: 5 });
+				setSyncMessage('');
+			} catch (error) {
+				setSyncMessage('Lỗi khi bật: ' + error);
+			}
+		} else {
+			const newStatus: CookieStatus = { enabled: false };
+			await saveData('COOKIE_STATUS', newStatus);
+			setCookieStatus(newStatus);
+			chrome.alarms.clear('keepAlive');
+			setSyncMessage('');
+		}
+	}
+
+	const autoLoginPopover = (
+		<Popover id="auto-login-popover">
+			<Popover.Header as="h3" className="text-primary">Tự đăng nhập</Popover.Header>
+			<Popover.Body>
+				<div className="text-start">
+					<strong>HDSD và lưu ý:</strong><br/>
+					1. Nhập MSSV + mật khẩu rồi lưu lại.<br/>
+					2. Chọn trang bạn muốn tự động đăng nhập.<br/>
+					<hr className="my-2"/>
+					<em>*Thông tin đăng nhập của bạn sẽ được mã hóa và lưu vào storage của extension, chỉ được dùng cho mục đích tự đăng nhập, không dùng cho mục đích khác và không chia sẻ ra bên ngoài.</em><br/>
+					<strong className="text-danger">
+						<em>*Lưu ý: Dù thông tin đã được mã hóa, vẫn tiềm ẩn một số rủi ro bảo mật. Chỉ nên sử dụng trên máy tính cá nhân. </em>
+						<span 
+							className="text-primary text-decoration-underline" 
+							style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}
+							onClick={() => {
+								setShowSecurityModal(true);
+								setShowAutoLoginPopover(false);
+							}}
+						>
+							Xem thêm
+						</span>
+					</strong>
+				</div>
+			</Popover.Body>
+		</Popover>
+	);
+
+	const keepAlivePopover = (
+		<Popover id="keep-alive-popover">
+			<Popover.Header as="h3" className="text-success">Giữ kết nối</Popover.Header>
+			<Popover.Body>
+				<div className="text-start">
+					<strong>HDSD và lưu ý:</strong><br/>
+					1. Bật 'Duy trì kết nối'.<br/>
+					2. Đăng nhập vào web trường.<br/>
+					3. Chọn trang bạn muốn giữ đăng nhập.<br/>
+					<hr className="my-2"/>
+					<em>*Extension sẽ gửi request ngầm định kỳ đến các trang web để giúp bạn không bị logout do không hoạt động trong thời gian dài.</em>
+				</div>
+			</Popover.Body>
+		</Popover>
+	);
+
+	return (
+		<Container className="p-3" style={{ width: '350px' }}>
+			<h6 className="text-center mb-3 fw-bold text-primary">CÀI ĐẶT</h6>
+			
+			<Tabs defaultActiveKey="autologin" id="setting-tabs" className="mb-3 nav-fill">
+				<Tab eventKey="autologin" title="Tự đăng nhập">
+					<div className="bg-light p-2 rounded mb-3 border">
+						<p className="mb-2 fw-bold small text-secondary d-flex align-items-center">
+							Chọn trang để tự đăng nhập:
+							<OverlayTrigger 
+								trigger="click" 
+								rootClose 
+								placement="bottom" 
+								overlay={autoLoginPopover}
+								show={showAutoLoginPopover}
+								onToggle={(nextShow) => setShowAutoLoginPopover(nextShow)}
+							>
+								<span className="ms-2 border border-black border-2 rounded-circle d-inline-flex align-items-center justify-content-center text-muted" style={{ width: '20px', height: '20px', fontSize: '14px', cursor: 'pointer' }}>?</span>
+							</OverlayTrigger>
+						</p>
+						<div style={{ maxHeight: '150px', overflowY: 'auto' }}>
+							{webs.map((web) => (
+								<Form.Check
+									key={web.id}
+									type="switch"
+									id={`auto-${web.id}`}
+									label={web.name}
+									checked={web.isAutoLogin}
+									onChange={() => handleToggleCheck(web.id, 'isAutoLogin')}
+									className="mb-1"
+									style={{ fontSize: '0.9rem' }}
+								/>
+							))}
+						</div>
+					</div>
+
+					<Form onSubmit={handleSubmit} className="border-top pt-2">
+						<p className="mb-2 fw-bold small text-secondary">Cập nhật tài khoản:</p>
+						<Form.Group controlId="username" className="mb-2">
+							<Form.Control required size="sm" placeholder="MSSV" ref={usernameRef} />
+						</Form.Group>
+						<Form.Group controlId="password">
+							<Form.Control required size="sm" type="password" placeholder="Mật khẩu" ref={passwordRef} />
+						</Form.Group>
+						{saveMessage && (
+							<Alert variant="success" className="mt-2 py-1 px-2 small text-center mb-0">
+								{saveMessage}
+							</Alert>
+						)}
+						<Button variant="primary" type="submit" size="sm" className="w-100 mt-2">
+							Lưu thông tin
+						</Button>
+					</Form>
+				</Tab>
+
+				<Tab eventKey="keepalive" title="Giữ kết nối">
+					<Alert variant="warning" className="py-1 px-2 small mb-2 text-center" style={{ fontSize: '0.8rem' }}>
+						<strong>Lưu ý:</strong> Tính năng đang thử nghiệm, có thể hoạt động không ổn định.
+					</Alert>
+					<div className="bg-white p-2 rounded mb-2 border border-success">
+						<div className="d-flex align-items-center mb-1">
+							<Form.Check 
+								type="switch"
+								id="master-keepalive"
+								label={<strong className="text-success">Duy trì kết nối</strong>}
+								checked={cookieStatus.enabled}
+								onChange={(e) => handleToggleKeepAlive(e.target.checked)}
+							/>
+							<OverlayTrigger trigger="click" rootClose placement="bottom" overlay={keepAlivePopover}>
+								<span className="ms-2 border border-black border-2 rounded-circle d-inline-flex align-items-center justify-content-center text-muted" style={{ width: '20px', height: '20px', fontSize: '14px', cursor: 'pointer' }}>?</span>
+							</OverlayTrigger>
+						</div>
+					</div>
+
+					{cookieStatus.enabled && (
+						<>
+							<div className="bg-light p-2 rounded mb-3 border">
+								<p className="mb-2 fw-bold small text-secondary">Trang web áp dụng:</p>
+								<div style={{ maxHeight: '150px', overflowY: 'auto' }}>
+									{webs.map((web) => (
+										<Form.Check
+											key={web.id}
+											type="switch"
+											id={`keep-${web.id}`}
+											label={web.name}
+											checked={web.isKeepAlive}
+											onChange={() => handleToggleCheck(web.id, 'isKeepAlive')}
+											className="mb-1"
+											style={{ fontSize: '0.9rem' }}
+										/>
+									))}
+								</div>
+							</div>
+
+							<div className="alert alert-info py-2 px-2 small mb-2 text-center">
+								<strong>Check lần cuối:</strong> {cookieStatus.lastSynced ? new Date(cookieStatus.lastSynced).toLocaleTimeString('vi-VN') : '-'}
+							</div>
+						</>
+					)}
+
+					{syncMessage && (
+						<Alert variant="warning" className="py-1 px-2 small text-center mb-2">
+							{syncMessage}
+						</Alert>
+					)}
+
+					{!cookieStatus.enabled && (
+						<div className="text-center p-3 text-muted small">
+							Gạt switch phía trên để bắt đầu duy trì session.
+						</div>
+					)}
+				</Tab>
+			</Tabs>
+
+			<Link to="/" className="d-grid mt-3 text-decoration-none">
+				<Button variant="outline-secondary" size="sm">
+					Quay lại màn hình chính
 				</Button>
 			</Link>
+
+			{/* Security Risk Modal */}
+			<Modal show={showSecurityModal} onHide={() => setShowSecurityModal(false)} centered size="sm">
+				<Modal.Header closeButton className="py-2">
+					<Modal.Title as="h6" className="fw-bold text-danger">Rủi ro bảo mật</Modal.Title>
+				</Modal.Header>
+				<Modal.Body className="small">
+					<p>Do đặc thù tính năng <strong>Tự đăng nhập</strong>, extension buộc phải lưu trữ cả thông tin đăng nhập đã mã hóa và khóa giải mã ngay trên trình duyệt.</p>
+					
+					<h6 className="fw-bold text-dark mt-3" style={{ fontSize: '0.9rem' }}>1. Truy cập vật lý</h6>
+					<p className="text-muted mb-2">
+						Nếu ai đó sử dụng máy tính của bạn, họ có thể truy cập vào bộ nhớ của extension để lấy thông tin đăng nhập và khóa giải mã, sau đó giải mã chúng.
+					</p>
+
+					<h6 className="fw-bold text-dark mt-3" style={{ fontSize: '0.9rem' }}>2. Phần mềm độc hại (Malware)</h6>
+					<p className="text-muted mb-2">
+						Nếu máy tính bị nhiễm virus, hacker có thể đánh cắp dữ liệu trình duyệt (bao gồm cả dữ liệu của extension).
+					</p>
+
+					<Alert variant="warning" className="mt-3 mb-0 p-2 text-start" style={{ fontSize: '0.85rem' }}>
+						Chỉ nên dùng extension này trên máy cá nhân, không dùng trên máy công cộng.
+					</Alert>
+				</Modal.Body>
+				<Modal.Footer className="py-1">
+					<Button variant="secondary" size="sm" onClick={() => setShowSecurityModal(false)}>
+						Đã hiểu
+					</Button>
+				</Modal.Footer>
+			</Modal>
 		</Container>
 	);
 }
