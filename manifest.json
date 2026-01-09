@@ -20,6 +20,6 @@
 	"background": {
 		"service_worker": "service-worker.js"
 	},
-	"permissions": ["tabs", "storage", "cookies", "alarms"],
+	"permissions": ["storage", "cookies", "alarms"],
 	"host_permissions": ["https://*.uit.edu.vn/*"]
 }
