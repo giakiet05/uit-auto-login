@@ -111,6 +111,9 @@ async function handleAutoLogin() {
 			'#edit-english-captcha-answer'
 		);
 		if (captchaInput) {
+			let answer: string | null = null;
+
+			// METHOD 1: Try old method - extract answer from parentheses in label text
 			const captchaLabel = document.querySelector<HTMLLabelElement>(
 				'label[for="edit-english-captcha-answer"]'
 			);
@@ -118,10 +121,36 @@ async function handleAutoLogin() {
 				const labelText = captchaLabel.textContent || '';
 				const match = labelText.match(/\(([^)]+)\)/);
 				if (match && match[1]) {
-					const answer = match[1];
-					captchaInput.value = answer;
-					captchaInput.dispatchEvent(new Event('input', { bubbles: true }));
+					answer = match[1];
 				}
+			}
+
+			// METHOD 2: If not found, try new method - extract from img alt text
+			if (!answer) {
+				let captchaImg: HTMLImageElement | null = null;
+
+				// Try finding img inside label first
+				if (captchaLabel) {
+					captchaImg = captchaLabel.querySelector<HTMLImageElement>('img');
+				}
+
+				// Fallback: find img with captcha alt globally
+				if (!captchaImg) {
+					captchaImg = document.querySelector<HTMLImageElement>('img[alt^="captcha:"]');
+				}
+
+				if (captchaImg && captchaImg.alt) {
+					const altText = captchaImg.alt;
+					if (altText.startsWith('captcha:')) {
+						answer = altText.split(':')[1];
+					}
+				}
+			}
+
+			// Fill answer if found
+			if (answer) {
+				captchaInput.value = answer;
+				captchaInput.dispatchEvent(new Event('input', { bubbles: true }));
 			}
 		}
 
